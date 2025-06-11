@@ -1,12 +1,14 @@
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+require('dotenv').config();
+const VIDEO_DIR = process.env.VIDEO_DIR;
+
 const videoRoutes = require('./routes/video-routes');
 
 const app = express();
 const PORT = 5000;
-
-const VIDEO_DIR = 'F:\\Videos\\SD Card'; // your folder
 
 app.use(cors());
 
