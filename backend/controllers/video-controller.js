@@ -2,10 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = require('ffmpeg-static');
+const ffprobeStatic = require('ffprobe-static');
 
+ffmpeg.setFfprobePath(ffprobeStatic.path);
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-const VIDEO_DIR = 'D:\\test-videos';
+const VIDEO_DIR = process.env.VIDEO_DIR;
 const THUMBNAIL_DIR = path.join(VIDEO_DIR, 'thumbnails'); // your thumbnail folder inside video folder
 const videoExtensions = ['.mp4', '.mkv', '.avi', '.mov'];
 
@@ -74,6 +76,19 @@ function generateThumbnail(videoRelativePath) {
   });
 }
 
+function getVideoDuration(videoFullPath) {
+  return new Promise((resolve, _) => {
+    ffmpeg.ffprobe(videoFullPath, (err, metadata) => {
+      if (err) {
+        console.error(`Error getting duration: ${videoFullPath}`, err);
+        resolve(0);
+      } else {
+        resolve(metadata.format.duration || 0);
+      }
+    });
+  });
+}
+
 exports.getRecommendedVideos = async (req, res) => {
   try {
     const searchQuery = req.query.search?.toLowerCase().trim() || '';
@@ -85,7 +100,10 @@ exports.getRecommendedVideos = async (req, res) => {
       );
     }
 
-    const resultVideos = searchQuery ? allVideos : allVideos.sort(() => 0.5 - Math.random()).slice(0, 10);
+    const resultVideos = searchQuery ? allVideos : allVideos.sort(() => 0.5 - Math.random()).slice(0, 12); // Limit to 12 results
+    if (resultVideos.length === 0) {
+      return res.status(404).json({ error: 'No videos found' });
+    }
 
     // Generate thumbnails for all videos concurrently
     const videosWithThumbnails = await Promise.all(
@@ -95,9 +113,22 @@ exports.getRecommendedVideos = async (req, res) => {
       })
     );
 
-    res.json({ videos: videosWithThumbnails });
+    const videosWithMetadata = await Promise.all(
+      resultVideos.map(async (video) => {
+        const videoFullPath = path.join(VIDEO_DIR, video.relativePath);
+        const [thumbnailUrl, duration] = await Promise.all([
+          generateThumbnail(video.relativePath),
+          getVideoDuration(videoFullPath)
+        ]);
+        return { ...video, thumbnailUrl, duration };
+      })
+    );
+
+    res.json({ videos: videosWithMetadata });
   } catch (err) {
     console.error('Error fetching videos:', err);
     res.status(500).json({ error: 'Failed to load videos' });
   }
 };
+
+

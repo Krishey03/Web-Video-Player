@@ -5,11 +5,7 @@ import Hometest from './pages/home-test';
 
 function App() {
   return (
-    <div style={{ padding: '1rem' }}>
-      <nav style={{ marginBottom: '1rem' }}>
-        <Link to="/" style={{ marginRight: '1rem' }}>🏠 Home</Link>
-      </nav>
-
+    <div>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/hometest" element={<Hometest />} />

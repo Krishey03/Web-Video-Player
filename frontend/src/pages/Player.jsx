@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Share2, MoreHorizontal, Play, Clock } from 'lucide-react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { Search, ArrowLeft, Download, Share2, MoreHorizontal, Play, Clock } from "lucide-react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import NavBar from "../components/reuse/navbar";
 
-function Player() {
+export default function Playertest() {
   const location = useLocation();
-  const navigate = useNavigate();
   const videoPath = decodeURIComponent(location.pathname.replace('/player', ''));
   const [recommendedVideos, setRecommendedVideos] = useState([]);
   const [isLoadingRecs, setIsLoadingRecs] = useState(true);
@@ -34,165 +36,103 @@ function Player() {
     fetchRecommendedVideos();
   }, [videoPath]);
 
+  const formatDuration = (seconds) => {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  
+  return hours > 0 
+    ? `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    : `${minutes}:${secs.toString().padStart(2, '0')}`;
+};
+
   return (
-    <div className="flex flex-col flex-1 bg-slate-950 text-slate-100">
-      {/* Header */}
-      <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex items-center space-x-2 text-slate-400 hover:text-slate-100 transition-colors duration-200 group"
-              >
-                <ArrowLeft className="w-5 h-5 group-hover:transform group-hover:-translate-x-1 transition-transform duration-200" />
-                <span className="text-sm font-medium hidden sm:inline">Back to Library</span>
-              </button>
-            </div>
-            
-            <h1 className="text-lg font-semibold text-slate-200 truncate max-w-xs md:max-w-md">
-              {formattedVideoName}
-            </h1>
-            
-            <div className="flex items-center space-x-2">
-              <button className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-all duration-200">
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-all duration-200">
-                <Download className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-all duration-200">
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
+    <div className="min-h-screen bg-[#0f0f0f] text-white">
+      {/* Navigation Header */}
+      <header className="flex items-center justify-between p-4 border-b border-[#1c1c1e]">
+        <NavBar search="" setSearch={() => {}} />
+      </header>
+
+      {/* Main Content */}
+      <div className="flex gap-6 p-6">
+        {/* Main Video Player */}
+        <div className="flex-1">
+          <div className="relative aspect-video bg-[#1c1c1e] rounded-lg overflow-hidden">
+            <video
+              src={`http://localhost:5000${videoPath}`}
+              controls
+              autoPlay
+              className="w-full h-full object-contain"
+            />
+          </div>
+          
+          {/* Video Info */}
+          <div className="mt-4">
+            <h1 className="text-2xl font-bold text-white">{formattedVideoName}</h1>
+            <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
+              <span>Now Playing</span>
+              <span>•</span>
+              <span>{new Date().toLocaleDateString()}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Video Player Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Video Player */}
-          <div className="lg:col-span-3">
-            <div className="bg-slate-900/50 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
-              <div className="relative aspect-video bg-black">
-                <video
-                  src={`http://localhost:5000${videoPath}`}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain"
-                  style={{
-                    background: 'linear-gradient(45deg, #0f172a 25%, transparent 25%), linear-gradient(-45deg, #0f172a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0f172a 75%), linear-gradient(-45deg, transparent 75%, #0f172a 75%)',
-                    backgroundSize: '20px 20px',
-                    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
-                  }}
-                />
-              </div>
+        {/* Video Sidebar */}
+        <div className="w-80 space-y-4">
+          <h3 className="text-lg font-semibold text-white">Recommended Videos</h3>
+          
+          {isLoadingRecs ? (
+            <div className="space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-3 animate-pulse">
+                  <div className="w-32 h-20 bg-[#1c1c1e] rounded-lg"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-[#1c1c1e] rounded w-3/4"></div>
+                    <div className="h-3 bg-[#1c1c1e] rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
             </div>
-
-            {/* Video Info */}
-            <div className="mt-6 space-y-4">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-100 mb-2">
-                  {formattedVideoName}
-                </h1>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
-                  <span>Now Playing</span>
-                  <span>•</span>
-                  <span>{new Date().toLocaleDateString()}</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Video Details */}
-            <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-5">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Video Details</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Format:</span>
-                  <span className="text-slate-100">MP4</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Quality:</span>
-                  <span className="text-slate-100">Auto</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Status:</span>
-                  <span className="text-green-400">Ready to play</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Size:</span>
-                  <span className="text-slate-100">128 MB</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Recommended Videos */}
-            <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-5">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Recommended Videos</h3>
-              
-              {isLoadingRecs ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <div className="bg-slate-800 rounded-lg aspect-video mb-2"></div>
-                      <div className="h-4 bg-slate-800 rounded w-3/4"></div>
+          ) : recommendedVideos.length > 0 ? (
+            recommendedVideos.map((video, index) => (
+              <Link
+                to={`/player${video.url}`}
+                key={index}
+                className="flex gap-3 group hover:bg-[#1c1c1e]/70 rounded-lg p-2 transition-all"
+              >
+                <div className="relative w-32 h-20 bg-[#1c1c1e] rounded-lg overflow-hidden flex-shrink-0">
+                  {video.thumbnailUrl ? (
+                    <img
+                      src={`http://localhost:5000${video.thumbnailUrl}`}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Play className="w-4 h-4 text-gray-500" />
                     </div>
-                  ))}
+                  )}
                 </div>
-              ) : recommendedVideos.length > 0 ? (
-                <div className="space-y-4">
-                  {recommendedVideos.map((video, index) => (
-                    <Link
-                      to={`/player${video.url}`}
-                      key={index}
-                      className="group block bg-slate-800/30 hover:bg-slate-800/70 rounded-lg p-2 transition-all duration-200"
-                    >
-                      <div className="flex gap-3">
-                        <div className="relative flex-shrink-0 w-16 aspect-video rounded-md overflow-hidden bg-slate-700">
-                          {video.thumbnailUrl ? (
-                            <img
-                              src={`http://localhost:5000${video.thumbnailUrl}`}
-                              alt={video.title}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Play className="w-4 h-4 text-slate-500" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors"></div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-slate-100 truncate group-hover:text-blue-400 transition-colors">
-                            {video.title}
-                          </h4>
-                          <div className="text-xs text-slate-400 mt-1 flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            <span>{video.duration || '0:00'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                <div className="flex-1 py-1 overflow-hidden">
+                  <h3 className="text-white font-medium text-sm leading-tight truncate group-hover:text-[#ef4444]">
+                    {video.title}
+                  </h3>
+                    <div className="text-xs text-gray-400 mt-1 flex items-center">
+                      <Clock className="w-3 h-3 mr-1" />
+                      <span>{formatDuration(video.duration)}</span>
+                    </div>
                 </div>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-slate-500 text-sm">
-                    No recommendations available
-                  </p>
-                </div>
-              )}
+              </Link>
+            ))
+          ) : (
+            <div className="text-center py-4 text-gray-500 text-sm">
+              No recommendations available
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default Player;
