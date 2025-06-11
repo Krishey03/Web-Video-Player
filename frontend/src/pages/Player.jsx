@@ -35,7 +35,7 @@ function Player() {
   }, [videoPath]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex flex-col flex-1 bg-slate-950 text-slate-100">
       {/* Header */}
       <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -103,22 +103,6 @@ function Player() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-slate-800 gap-4">
-                <div className="flex items-center flex-wrap gap-2">
-                  <button className="bg-slate-800 hover:bg-slate-700 text-slate-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                    Like
-                  </button>
-                  <button className="bg-slate-800 hover:bg-slate-700 text-slate-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                    Add to Playlist
-                  </button>
-                  <button className="bg-slate-800 hover:bg-slate-700 text-slate-100 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                    Share
-                  </button>
-                </div>
-                <div className="text-slate-400 text-xs sm:text-sm">
-                  Video path: <code className="bg-slate-800 px-2 py-1 rounded text-xs break-all">{videoPath}</code>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -203,25 +187,6 @@ function Player() {
                   </p>
                 </div>
               )}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-5">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <button className="w-full flex items-center space-x-3 text-left px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-colors duration-200">
-                  <Download className="w-4 h-4" />
-                  <span>Download Video</span>
-                </button>
-                <button className="w-full flex items-center space-x-3 text-left px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-colors duration-200">
-                  <Share2 className="w-4 h-4" />
-                  <span>Share Link</span>
-                </button>
-                <button className="w-full flex items-center space-x-3 text-left px-3 py-2 text-sm text-slate-300 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-colors duration-200">
-                  <MoreHorizontal className="w-4 h-4" />
-                  <span>More Options</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
