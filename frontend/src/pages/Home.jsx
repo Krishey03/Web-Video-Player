@@ -6,9 +6,22 @@ import NavBar from "../components/reuse/navbar";
 
 export default function Hometest() {
   const [videos, setVideos] = useState([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('search') || '';
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState(null, '', newUrl);
+}, [search]);
+
 
   useEffect(() => {
     const fetchVideos = async () => {

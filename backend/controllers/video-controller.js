@@ -131,4 +131,90 @@ exports.getRecommendedVideos = async (req, res) => {
   }
 };
 
+// In video-controller.js
+exports.renameVideo = async (req, res) => {
+  try {
+    const { oldPath, newName } = req.body;
+    
+    // Remove '/videos' prefix if present (since VIDEO_DIR already includes it)
+    const cleanOldPath = oldPath.startsWith('/videos/') 
+      ? oldPath.substring('/videos'.length) 
+      : oldPath;
+
+    // Sanitize the new name
+    const sanitizedNewName = newName.replace(/[^\w\s.-]/gi, '');
+    if (!sanitizedNewName) {
+      return res.status(400).json({ error: 'Invalid new name' });
+    }
+
+    const oldFullPath = path.join(VIDEO_DIR, cleanOldPath);
+    const directory = path.dirname(oldFullPath);
+    const extension = path.extname(oldFullPath);
+    const newFullPath = path.join(directory, `${sanitizedNewName}${extension}`);
+
+    console.log('Resolved paths:');
+    console.log('VIDEO_DIR:', VIDEO_DIR);
+    console.log('Old path:', oldFullPath);
+    console.log('New path:', newFullPath);
+    console.log('Directory exists:', fs.existsSync(directory));
+    console.log('Old file exists:', fs.existsSync(oldFullPath));
+
+    // Verify directory exists
+    if (!fs.existsSync(directory)) {
+      return res.status(404).json({ 
+        error: 'Directory not found',
+        directory: directory
+      });
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(oldFullPath)) {
+      return res.status(404).json({ 
+        error: 'File not found',
+        path: oldFullPath,
+        relativePath: cleanOldPath
+      });
+    }
+
+    // Check if new filename exists
+    if (fs.existsSync(newFullPath)) {
+      return res.status(409).json({ 
+        error: 'File already exists',
+        path: newFullPath
+      });
+    }
+
+    // Perform rename
+    fs.renameSync(oldFullPath, newFullPath);
+    
+    // Handle thumbnail rename
+    try {
+      const oldThumbnailName = cleanOldPath.replace(/\//g, '_') + '.png';
+      const oldThumbnailPath = path.join(THUMBNAIL_DIR, oldThumbnailName);
+      
+      if (fs.existsSync(oldThumbnailPath)) {
+        const newThumbnailName = path.relative(VIDEO_DIR, newFullPath).replace(/\//g, '_') + '.png';
+        const newThumbnailPath = path.join(THUMBNAIL_DIR, newThumbnailName);
+        fs.renameSync(oldThumbnailPath, newThumbnailPath);
+      }
+    } catch (thumbnailError) {
+      console.error('Thumbnail rename failed:', thumbnailError);
+    }
+
+    const relativeNewPath = path.relative(VIDEO_DIR, newFullPath).replace(/\\/g, '/');
+    
+    res.json({ 
+      success: true,
+      newPath: relativeNewPath,
+      newUrl: `/videos/${relativeNewPath}`
+    });
+
+  } catch (err) {
+    console.error('Rename error:', err);
+    res.status(500).json({ 
+      error: 'Failed to rename video',
+      details: err.message
+    });
+  }
+};
 

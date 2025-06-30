@@ -10,6 +10,8 @@ const app = express();
 const PORT = 5000;
 
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Serve all nested static files
 app.use('/videos', express.static(VIDEO_DIR));
