@@ -218,3 +218,51 @@ exports.renameVideo = async (req, res) => {
   }
 };
 
+// Add this to your video-controller.js
+exports.deleteVideo = async (req, res) => {
+  try {
+    const { videoPath } = req.body;
+    
+    // Remove '/videos' prefix if present
+    const cleanPath = videoPath.startsWith('/videos/') 
+      ? videoPath.substring('/videos'.length) 
+      : videoPath;
+
+    const fullPath = path.join(VIDEO_DIR, cleanPath);
+
+    // Verify file exists
+    if (!fs.existsSync(fullPath)) {
+      return res.status(404).json({ 
+        error: 'File not found',
+        path: fullPath
+      });
+    }
+
+    // Delete the video file
+    fs.unlinkSync(fullPath);
+    
+    // Delete associated thumbnail if it exists
+    try {
+      const thumbnailName = cleanPath.replace(/\//g, '_') + '.png';
+      const thumbnailPath = path.join(THUMBNAIL_DIR, thumbnailName);
+      
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    } catch (thumbnailError) {
+      console.error('Thumbnail deletion failed:', thumbnailError);
+    }
+
+    res.json({ 
+      success: true,
+      message: 'Video deleted successfully'
+    });
+
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ 
+      error: 'Failed to delete video',
+      details: err.message
+    });
+  }
+};

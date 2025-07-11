@@ -1,11 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { getRecommendedVideos, renameVideo } = require('../controllers/video-controller');
+const { getRecommendedVideos, renameVideo, deleteVideo } = require('../controllers/video-controller');
 
 router.route('/videos')
   .get(getRecommendedVideos);
 
 router.route('/videos/rename')
   .put(renameVideo);
+
+router.route('/videos/delete')
+  .delete(deleteVideo);
 
 module.exports = router;
